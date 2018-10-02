@@ -1,0 +1,87 @@
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.*;
+
+public class networkDiagram extends JFrame implements ActionListener {
+
+	public static void main(String[] args) {
+		new networkDiagram().setVisible(true);
+	}
+	
+	private networkDiagram(){
+		super("PERT Diagram Maker");
+		
+		//------------------------------------------------------------------------------------The Window
+		setLayout(null);
+		setSize(600,600);
+		setResizable(false);
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		//------------------------------------------------------------------------------------The Bar
+		JMenuBar bar = new JMenuBar();
+		JMenu file = new JMenu("File");
+		JMenuItem NEW = new JMenuItem("New");
+		JMenuItem SAVE = new JMenuItem("Save");
+		JMenuItem OPEN = new JMenuItem("Open");
+		JMenuItem RESTART = new JMenuItem("Restart");
+		JMenuItem EXIT = new JMenuItem("Exit");
+		file.add(NEW);file.add(OPEN);file.add(SAVE);file.addSeparator();file.add(RESTART);file.add(EXIT);
+		JMenu help = new JMenu("Help");
+		JMenuItem ABOUT = new JMenuItem("About");
+		help.add(ABOUT);
+		
+		bar.add(file);bar.add(help);
+		EXIT.addActionListener(this);
+		
+		//------------------------------------------------------------------------------------Labels and Buttons
+		JLabel label1 = new JLabel("What would you like to do?");
+		label1.setLocation(200,200);label1.setSize(400,10);
+		JTextArea ActivityName = new JTextArea(100,100);
+		JButton addButton = new JButton("Add Activity");
+		JButton deleteButton = new JButton("Delete Activity");
+		addButton.setBounds(10, 480, 100, 50);
+		JLabel errorMessage = new JLabel("ERROR: This activity with these dependencies would cause a cycle.");
+		errorMessage.setLocation(10,70);errorMessage.setSize(600,10);
+		//add(errorMessage);
+		addButton.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e) {
+			JLabel prompt = new JLabel("What is the activity? Enter the name and then follow with an underscore and char.");
+			prompt.setLocation(10,10);prompt.setSize(600,14);
+			add(prompt);
+			ActivityName.setBounds(10,50,400,20);
+			add(ActivityName);
+			label1.setText("Adding Activity...");
+			}
+		});
+		add(addButton);
+		/*
+		ActivityName.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				JLabel errorMessage = new JLabel("ERROR: This activity with these dependencies would cause a cycle.");
+			}
+		});*/
+		
+		deleteButton.setBounds(120,480,120,50);
+		deleteButton.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e) {
+			label1.setText("Deleting Activity...");
+			}
+		});
+		add(deleteButton);
+
+		add(label1);
+		setJMenuBar(bar);
+		
+	}
+
+	
+	//------------------------------------------------------------------------------Outside Action Performed
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if (e.getActionCommand().equals("Exit")){
+			System.exit(0);
+		}
+		
+	}
+}
