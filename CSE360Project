@@ -9,11 +9,11 @@ public class networkDiagram extends JFrame implements ActionListener {
 	}
 	
 	private networkDiagram(){
-		super("PERT Diagram Maker");
+		super("PERT Pathfinder");
 		
 		//------------------------------------------------------------------------------------The Window
 		setLayout(null);
-		setSize(600,600);
+		setSize(400,400);
 		setResizable(false);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		//------------------------------------------------------------------------------------The Bar
@@ -31,47 +31,55 @@ public class networkDiagram extends JFrame implements ActionListener {
 		
 		bar.add(file);bar.add(help);
 		EXIT.addActionListener(this);
-		
-		//------------------------------------------------------------------------------------Labels and Buttons
-		JLabel label1 = new JLabel("What would you like to do?");
-		label1.setLocation(200,200);label1.setSize(400,10);
-		JTextArea ActivityName = new JTextArea(100,100);
-		JButton addButton = new JButton("Add Activity");
-		JButton deleteButton = new JButton("Delete Activity");
-		addButton.setBounds(10, 480, 100, 50);
-		JLabel errorMessage = new JLabel("ERROR: This activity with these dependencies would cause a cycle.");
-		errorMessage.setLocation(10,70);errorMessage.setSize(600,10);
-		//add(errorMessage);
-		addButton.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e) {
-			JLabel prompt = new JLabel("What is the activity? Enter the name and then follow with an underscore and char.");
-			prompt.setLocation(10,10);prompt.setSize(600,14);
-			add(prompt);
-			ActivityName.setBounds(10,50,400,20);
-			add(ActivityName);
-			label1.setText("Adding Activity...");
-			}
-		});
-		add(addButton);
-		/*
-		ActivityName.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e) {
-				JLabel errorMessage = new JLabel("ERROR: This activity with these dependencies would cause a cycle.");
-			}
-		});*/
-		
-		deleteButton.setBounds(120,480,120,50);
-		deleteButton.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e) {
-			label1.setText("Deleting Activity...");
-			}
-		});
-		add(deleteButton);
 
-		add(label1);
 		setJMenuBar(bar);
+		//------------------------------------------------------------------------------------Labels and Buttons		
+		JButton addButton = new JButton("Add Activity");
+		addButton.setBounds(10, 280, 100, 50);
+		add(addButton);
+		JButton pathButton = new JButton("Find Pathways");
+		pathButton.setBounds(120,280,120,50);
+		add(pathButton);		
+		
+		JLabel label1 = new JLabel("Activity Name");
+		label1.setLocation(10,35);label1.setSize(400,10);
+		JTextArea activityName = new JTextArea(100,100);
+		
+		JLabel label2 = new JLabel("Symbol");
+		label2.setLocation(10,85);label2.setSize(400,10);
+		JTextArea symbol = new JTextArea(100,100);
+		
+		JLabel label3 = new JLabel("Activity Dependencies");
+		label3.setLocation(10,135);label3.setSize(400,10);
+		JTextArea dependencies = new JTextArea(100,100);
+		
+		JLabel label4 = new JLabel("Activity Duration");
+		label4.setLocation(10,185);label4.setSize(400,10);
+		JTextArea time = new JTextArea(100,100);	
+		
+		activityName.setBounds(10,50,375,20);
+		symbol.setBounds(10,100,375,20);
+		dependencies.setBounds(10,150,375,20);
+		time.setBounds(10,200,375,20);
+		
+		add(activityName);
+		add(symbol);
+		add(dependencies);
+		add(time);
+		add(label1);
+		add(label2);
+		add(label3);
+		add(label4);
+
+		addButton.addActionListener(new ActionListener() { 
+			public void actionPerformed(ActionEvent e) { 
+				String a = activityName.getText();
+				String s = symbol.getText();
+				String d = dependencies.getText();
+				String t = time.getText();
+				System.out.println(a+" "+s+" "+d+" "+t);
+			}
+		});
 		
 	}
 
@@ -82,6 +90,5 @@ public class networkDiagram extends JFrame implements ActionListener {
 		if (e.getActionCommand().equals("Exit")){
 			System.exit(0);
 		}
-		
 	}
 }
