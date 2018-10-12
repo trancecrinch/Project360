@@ -2,84 +2,135 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.*;
 
+/*This code is assuming the characteristics of the Graph class and Node class are...
+		GRAPH
+		Node[] nodeArray = new Node[99];
+		NODE
+		String name; // is the name of the node for the depen
+		int duration; // user input of the time
+		char symbol;
+		char[] dependencies = new char[99];
+
+*/
+
+
 public class networkDiagram extends JFrame implements ActionListener {
 
 	public static void main(String[] args) {
 		new networkDiagram().setVisible(true);
 	}
 	
+	int activityCounter = 0;//Used to go down the list of nodes in the graph
+
 	private networkDiagram(){
 		super("PERT Pathfinder");
 		
 		//------------------------------------------------------------------------------------The Window
 		setLayout(null);
-		setSize(400,400);
+		setSize(800,400);
 		setResizable(false);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		//------------------------------------------------------------------------------------The Bar
 		JMenuBar bar = new JMenuBar();
 		JMenu file = new JMenu("File");
-		JMenuItem NEW = new JMenuItem("New");
-		JMenuItem SAVE = new JMenuItem("Save");
-		JMenuItem OPEN = new JMenuItem("Open");
-		JMenuItem RESTART = new JMenuItem("Restart");
 		JMenuItem EXIT = new JMenuItem("Exit");
-		file.add(NEW);file.add(OPEN);file.add(SAVE);file.addSeparator();file.add(RESTART);file.add(EXIT);
-		JMenu help = new JMenu("Help");
-		JMenuItem ABOUT = new JMenuItem("About");
-		help.add(ABOUT);
+		file.add(EXIT);
 		
-		bar.add(file);bar.add(help);
+		bar.add(file);
 		EXIT.addActionListener(this);
 
 		setJMenuBar(bar);
-		//------------------------------------------------------------------------------------Labels and Buttons		
+		//----------------------------------------------------------------------------------------Buttons		
 		JButton addButton = new JButton("Add Activity");
 		addButton.setBounds(10, 280, 100, 50);
 		add(addButton);
 		JButton pathButton = new JButton("Find Pathways");
 		pathButton.setBounds(120,280,120,50);
 		add(pathButton);		
+		JButton helpButton = new JButton("Help");
+		helpButton.setBounds(250,280,80,50);
+		add(helpButton);
+		JButton aboutButton = new JButton("About");
+		aboutButton.setBounds(340,280,80,50);
+		add(aboutButton);
 		
+		//----------------------------------------------------------------------------------------Labels
 		JLabel label1 = new JLabel("Activity Name");
 		label1.setLocation(10,35);label1.setSize(400,10);
 		JTextArea activityName = new JTextArea(100,100);
 		
 		JLabel label2 = new JLabel("Symbol");
 		label2.setLocation(10,85);label2.setSize(400,10);
-		JTextArea symbol = new JTextArea(100,100);
+		JTextArea activitySymbol = new JTextArea(100,100);
 		
 		JLabel label3 = new JLabel("Activity Dependencies");
 		label3.setLocation(10,135);label3.setSize(400,10);
-		JTextArea dependencies = new JTextArea(100,100);
+		JTextArea depend = new JTextArea(100,100);
 		
 		JLabel label4 = new JLabel("Activity Duration");
 		label4.setLocation(10,185);label4.setSize(400,10);
 		JTextArea time = new JTextArea(100,100);	
 		
+		JLabel monitor = new JLabel("<html>Welcome to PERT <br/>Pathfinder</html>");
+		monitor.setLocation(430,10); monitor.setSize(340,300);
+		
+		
 		activityName.setBounds(10,50,375,20);
-		symbol.setBounds(10,100,375,20);
-		dependencies.setBounds(10,150,375,20);
+		activitySymbol.setBounds(10,100,375,20);
+		depend.setBounds(10,150,375,20);
 		time.setBounds(10,200,375,20);
 		
 		add(activityName);
-		add(symbol);
-		add(dependencies);
+		add(activitySymbol);
+		add(depend);
 		add(time);
 		add(label1);
 		add(label2);
 		add(label3);
 		add(label4);
-
+		add(monitor);
+		
+		//-----------------------------------------------------------------------------------Graph stuff
+		Graph g = new Graph();
+				
+		
+		//---------------------------------------------------------------------------------Button actions
 		addButton.addActionListener(new ActionListener() { 
 			public void actionPerformed(ActionEvent e) { 
 				String a = activityName.getText();
-				String s = symbol.getText();
-				String d = dependencies.getText();
+				String s = activitySymbol.getText();
+				String d = depend.getText();
 				String t = time.getText();
-				System.out.println(a+" "+s+" "+d+" "+t);
+				
+				//EDIT HERE   Call Error Checking Method here or...
+				g.nodeArray[activityCounter].name=a;
+				g.nodeArray[activityCounter].symbol=s.charAt(0);
+				g.nodeArray[activityCounter].duration=Integer.parseInt(t);
+				g.nodeArray[activityCounter].dependencies=d.toCharArray();
+				//EDIT HERE   here. Whichever is easiest
+				
+				activityCounter++;//EDIT HERE     This counter should only progress if the node was successfully added to the graph.
 			}
 		});
+		pathButton.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				//EDIT HERE     Call Find Pathways Method
+			}
+		});
+		helpButton.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				monitor.setText("<html>Enter any name for the Activity Name.<br/><br/>Enter a single character for the Symbol.<br/><br/>Enter the symbols"
+						+ " of each activity that this new activity depends on with no spaces.<br/>Example: BCD<br/>It is recommended that you do not enter any dependencies for your first activity.<br/>"
+						+ "<br/>Enter an integer for the time.<br/>"
+						+ "<br/>When you are done adding activities, press the 'Find Pathways' button to find all possible pathways in the chart</html>");
+			}
+		});
+		aboutButton.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				monitor.setText("<html>PERT Pathfinder<br/><br/>Developers:<br/>Zakarya Omar Agha<br/>Hayden Owen<br/>Christopher Persson<br/>Luke Shumaker<br/><br/>October 12, 2018</html>");
+			}
+		});
+		
 		
 	}
 
