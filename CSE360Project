@@ -5,7 +5,7 @@ import java.io.PrintWriter;
 
 import javax.swing.*;
 
-import mySQL.Graph.Node;
+import PROJECT.Graph.Node;
 
 public class networkDiagram extends JFrame implements ActionListener {
 
@@ -263,7 +263,7 @@ public class networkDiagram extends JFrame implements ActionListener {
                 }
             }
             
-			String filename = "C:/Users/crinc_000/Documents/School Projects/CSE360/"+name+".txt";
+			String filename = DIRECTORY+name+".txt";
 			try {
 				PrintWriter graphData = new PrintWriter(filename);
 				graphData.println(name);
