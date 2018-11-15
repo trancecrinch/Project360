@@ -1,15 +1,18 @@
+
 class Graph
 {
 
 	Node[] nodeArray = new Node[99]; 
+	Pathway[] pathArray = new Pathway[99];
 	
-public void setupGraph(Node[] n){
+public void setupGraph(Node[] n,Pathway[] p){
 	char[] d = new char[50];
 	for(int i = 0;i<50;i++){
 		d[i] = '_';
 	}
 	for(int i=0;i<99;i++){
 		n[i] = newNode(" ",'_',d,0);
+		p[i] = newPath("",0);
 	}
 }
 
@@ -35,7 +38,12 @@ public Node deleteNode(Node n){
 	return n;
 }
 
-
+public Pathway newPath(String n,int i){
+	Pathway p = new Pathway();
+	p.path = n;
+	p.totalDuration = i;
+	return p;
+}
 	
 public class Node
 {
@@ -45,5 +53,11 @@ public class Node
 		char[] dependencies = new char[50];
 }
 
+public class Pathway{
+	String path;
+	int totalDuration;
+}
+
 
 }
+
