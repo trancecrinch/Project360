@@ -1,30 +1,94 @@
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+
 import javax.swing.*;
 
-/*This code is assuming the characteristics of the Graph class and Node class are...
-		GRAPH
-		Node[] nodeArray = new Node[99];
-		NODE
-		String name; // is the name of the node for the depen
-		int duration; // user input of the time
-		char symbol;
-		char[] dependencies = new char[99];
-
-*/
-
+import mySQL.Graph.Node;
 
 public class networkDiagram extends JFrame implements ActionListener {
 
+	//-----------------------------------------------------------------------------------Graph stuff
+	Graph g = new Graph();
+	
 	public static void main(String[] args) {
 		new networkDiagram().setVisible(true);
 	}
+	
+
+	public boolean CheckError(Node x) {
+	    for (int i = 0; i < g.nodeArray.length; i++) {
+	        if(g.nodeArray[i].symbol != '_') {
+	        	System.out.println("Testing");
+	        	if(x.symbol == g.nodeArray[i].symbol) {
+	        		return true;
+	        	}
+	        }
+	    }
+	    if (ParentCheck(x, x) == true) {
+	        return true;
+	    }
+
+	    return false;
+
+	    }
+
+
+	//start with the node being added and look at the parents for the node that is being //added
+	//recursively check until the parents are empty, or the node being added is found
+
+
+	public boolean ParentCheck(Node x, Node y) {
+	    for (int i = 0; i < y.dependencies.length; i++) {
+	        if (x.symbol == y.dependencies[i]) {
+	            return true;
+	        }
+	        for (int j = 0; j < g.nodeArray.length; j++) {
+	            if (g.nodeArray[j].symbol != '_') {
+	            if (g.nodeArray[j].symbol == y.dependencies[i]) {
+	                ParentCheck(x, g.nodeArray[j]);
+	            }
+	        }
+	        }
+	    }
+	    return false;
+	}
+	
+
+	public String pathFinder(){
+	    String path = "";
+	    int duration = 0;
+	    for(int i = 0; i <= g.nodeArray.length; i++){
+	            if(g.nodeArray[i].dependencies == null){
+	                //path = g.nodeArray[i].symbol;
+	                duration += g.nodeArray[i].duration;
+	            }
+	            else if(g.nodeArray[i].dependencies != null){
+	                for(int j = 0; j <= g.nodeArray[i].dependencies.length; j++){
+	                    if(g.nodeArray[i].dependencies[j] == g.nodeArray[i+1].symbol){
+	                        path += ", " + g.nodeArray[i+1].symbol;
+	                        duration += g.nodeArray[i+1].duration;
+	                    }
+	                    else{
+	                        path += g.nodeArray[i].symbol;
+	                        duration += g.nodeArray[i].duration;
+	                    }
+	                }
+	            }
+	    }
+	    path += " - " + duration;
+	    return path;
+	}
+
+
 	
 	int activityCounter = 0;//Used to go down the list of nodes in the graph
 
 	private networkDiagram(){
 		super("PERT Pathfinder");
 		
+		g.setupGraph(g.nodeArray);
 		//------------------------------------------------------------------------------------The Window
 		setLayout(null);
 		setSize(800,400);
@@ -34,25 +98,37 @@ public class networkDiagram extends JFrame implements ActionListener {
 		JMenuBar bar = new JMenuBar();
 		JMenu file = new JMenu("File");
 		JMenuItem EXIT = new JMenuItem("Exit");
+		JMenuItem SAVE = new JMenuItem("Save");
+		JMenuItem RESTART = new JMenuItem("Restart");
+		file.add(SAVE);
+		file.addSeparator();
+		file.add(RESTART);
 		file.add(EXIT);
-		
 		bar.add(file);
+		
 		EXIT.addActionListener(this);
+		SAVE.addActionListener(this);
+		RESTART.addActionListener(this);
+		
 
 		setJMenuBar(bar);
 		//----------------------------------------------------------------------------------------Buttons		
 		JButton addButton = new JButton("Add Activity");
 		addButton.setBounds(10, 280, 100, 50);
 		add(addButton);
+		JButton changeDuration = new JButton("Adjust Duration");
+		changeDuration.setBounds(120,280,130,50);
+		add(changeDuration);
 		JButton pathButton = new JButton("Find Pathways");
-		pathButton.setBounds(120,280,120,50);
+		pathButton.setBounds(260,280,120,50);
 		add(pathButton);		
 		JButton helpButton = new JButton("Help");
-		helpButton.setBounds(250,280,80,50);
+		helpButton.setBounds(390,280,80,50);
 		add(helpButton);
 		JButton aboutButton = new JButton("About");
-		aboutButton.setBounds(340,280,80,50);
+		aboutButton.setBounds(480,280,80,50);
 		add(aboutButton);
+		
 		
 		//----------------------------------------------------------------------------------------Labels
 		JLabel label1 = new JLabel("Activity Name");
@@ -71,7 +147,7 @@ public class networkDiagram extends JFrame implements ActionListener {
 		label4.setLocation(10,185);label4.setSize(400,10);
 		JTextArea time = new JTextArea(100,100);	
 		
-		JLabel monitor = new JLabel("<html>Welcome to PERT <br/>Pathfinder</html>");
+		JLabel monitor = new JLabel("Welcome to PERT Pathfinder");
 		monitor.setLocation(430,10); monitor.setSize(340,300);
 		
 		
@@ -89,32 +165,58 @@ public class networkDiagram extends JFrame implements ActionListener {
 		add(label3);
 		add(label4);
 		add(monitor);
-		
-		//-----------------------------------------------------------------------------------Graph stuff
-		Graph g = new Graph();
 				
 		
 		//---------------------------------------------------------------------------------Button actions
 		addButton.addActionListener(new ActionListener() { 
-			public void actionPerformed(ActionEvent e) { 
+			public void actionPerformed(ActionEvent e) {
 				String a = activityName.getText();
-				String s = activitySymbol.getText();
-				String d = depend.getText();
-				String t = time.getText();
+				char s = activitySymbol.getText().charAt(0);
+				char[] d = new char[10];
+				if(activityCounter!=0){
+					d = depend.getText().toCharArray();
+				}
+				int t = Integer.parseInt(time.getText());
+				Node addedNode=g.newNode(a,s,d,t);
+				System.out.println(addedNode.name+"  "+addedNode.symbol+"  "+addedNode.dependencies[0]+"  "+addedNode.duration+"  ");
 				
-				//EDIT HERE   Call Error Checking Method here or...
-				g.nodeArray[activityCounter].name=a;
-				g.nodeArray[activityCounter].symbol=s.charAt(0);
-				g.nodeArray[activityCounter].duration=Integer.parseInt(t);
-				g.nodeArray[activityCounter].dependencies=d.toCharArray();
-				//EDIT HERE   here. Whichever is easiest
-				
-				activityCounter++;//EDIT HERE     This counter should only progress if the node was successfully added to the graph.
+				if(CheckError(addedNode)==true){
+					System.out.println("ERROR");
+					monitor.setText("Cycle or Already Added Activity detected. Entry denied.");
+				}
+				else{
+					System.out.println("no error");
+					g.nodeArray[activityCounter] = addedNode;
+					activityCounter++;
+					monitor.setText("Activity has been added.");
+				}
+				System.out.println(activityCounter);
+
 			}
 		});
+		changeDuration.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				char s = activitySymbol.getText().charAt(0);
+				int t = Integer.parseInt(time.getText());
+				
+				int counter = 0;
+				while(g.nodeArray[counter].symbol!=s && g.nodeArray[counter].symbol!='_'){
+					counter++;
+				}
+				if(g.nodeArray[counter].symbol=='_'){
+					monitor.setText("That activity doesn't exist");
+				}
+				else{
+					g.nodeArray[counter].symbol=s;
+					g.nodeArray[counter].duration=t;
+					monitor.setText("Activity duration has been changed.");
+				}
+			}
+		});
+		
 		pathButton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				//EDIT HERE     Call Find Pathways Method
+				System.out.println(pathFinder());
 			}
 		});
 		helpButton.addActionListener(new ActionListener(){
@@ -131,7 +233,6 @@ public class networkDiagram extends JFrame implements ActionListener {
 			}
 		});
 		
-		
 	}
 
 	
@@ -140,6 +241,49 @@ public class networkDiagram extends JFrame implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		if (e.getActionCommand().equals("Exit")){
 			System.exit(0);
+		}
+		if(e.getActionCommand().equals("Save")){
+            String name = JOptionPane.showInputDialog("What is the name of your graph?", null);
+            String date = JOptionPane.showInputDialog("Date and Time of Creation?",null);
+			
+            Node temp;
+            for (int i=0;i<activityCounter;i++) 
+            {
+                for (int j=i+1;j<activityCounter;j++) 
+                {
+                    if (g.nodeArray[i].name.compareTo(g.nodeArray[j].name)>0) 
+                    {
+                        System.out.println(g.nodeArray[i].name);
+                        System.out.println(g.nodeArray[j].name);
+                    	temp = g.newNode(g.nodeArray[i].name,g.nodeArray[i].symbol,g.nodeArray[i].dependencies,g.nodeArray[i].duration);
+                        g.nodeArray[i] = g.nodeArray[j];
+                        System.out.println(temp.name);
+                        g.nodeArray[j] = temp;
+                    }
+                }
+            }
+            
+			String filename = "C:/Users/crinc_000/Documents/School Projects/CSE360/"+name+".txt";
+			try {
+				PrintWriter graphData = new PrintWriter(filename);
+				graphData.println(name);
+				graphData.println(date);
+				graphData.println();
+				graphData.println("ACTIVITIES");
+				for(int i=0;i<activityCounter;i++){
+					graphData.println(g.nodeArray[i].name+"\t"+g.nodeArray[i].duration);
+				}
+				graphData.println();
+				graphData.println("POSSIBLE PATHWAYS");
+				graphData.close();
+			} catch (FileNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
+		if(e.getActionCommand().equals("Restart")){
+			activityCounter = 0;
+			g.setupGraph(g.nodeArray);
 		}
 	}
 }
