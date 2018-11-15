@@ -5,8 +5,8 @@ import java.io.PrintWriter;
 
 import javax.swing.*;
 
-import mySQL.Graph.Node;
-import mySQL.Graph.Pathway;
+import PROJECT.Graph.Node;
+import PROJECT.Graph.Pathway;
 
 public class networkDiagram extends JFrame implements ActionListener {
 
@@ -65,18 +65,16 @@ public class networkDiagram extends JFrame implements ActionListener {
 		current_path += n[progressCounter].symbol;
 		duration += n[progressCounter].duration;
 		boolean end = true;
+		System.out.println("Activity Counter  = "+activityCounter);
 		for(int j = progressCounter+1;j<activityCounter;j++){
-			int i = 0;
-			while(n[j].dependencies[i]!='_'){
-				System.out.println(j);
+			for(int i=0;i<n[j].dependencies.length;i++){
+				System.out.println(j+"    "+i);
 				if(n[progressCounter].symbol==n[j].dependencies[i]){
+					System.out.println("Dedendencies Char "+n[j].dependencies[i]);
 					progressCounter = j;
-					pathFinder(n,paths,progressCounter,current_path,duration);
+					paths=pathFinder(n,paths,progressCounter,current_path,duration);
 					end = false;
 					System.out.println(current_path);
-				}
-				else{
-					i++;
 				}
 			}
 		}
@@ -244,12 +242,12 @@ public class networkDiagram extends JFrame implements ActionListener {
 	            counter++;
 	            }
 				
-				monitor.setText("<html>CRITICAL PATH<b/>"+g.pathArray[0].path+"  "+g.pathArray[0].totalDuration+"<b/>"+g.pathArray[1].path+"  "+g.pathArray[1].totalDuration+"<b/>"
-						+g.pathArray[2].path+"  "+g.pathArray[2].totalDuration+"<b/>"+g.pathArray[3].path+"  "+g.pathArray[3].totalDuration+"<b/>"
-						+g.pathArray[4].path+"  "+g.pathArray[4].totalDuration+"<b/>"+g.pathArray[5].path+"  "+g.pathArray[5].totalDuration+"<b/>"
-						+g.pathArray[6].path+"  "+g.pathArray[6].totalDuration+"<b/>"+g.pathArray[7].path+"  "+g.pathArray[7].totalDuration+"<b/>"
-						+g.pathArray[8].path+"  "+g.pathArray[8].totalDuration+"<b/>"+g.pathArray[9].path+"  "+g.pathArray[9].totalDuration+"<b/>"
-						+g.pathArray[10].path+"  "+g.pathArray[10].totalDuration+"<b/>"+g.pathArray[11].path+"  "+g.pathArray[11].totalDuration+"<b/>"
+				monitor.setText("<html>CRITICAL PATH<br/>"+g.pathArray[0].path+"  "+g.pathArray[0].totalDuration+"<br/>"+g.pathArray[1].path+"  "+g.pathArray[1].totalDuration+"<br/>"
+						+g.pathArray[2].path+"  "+g.pathArray[2].totalDuration+"<br/>"+g.pathArray[3].path+"  "+g.pathArray[3].totalDuration+"<br/>"
+						+g.pathArray[4].path+"  "+g.pathArray[4].totalDuration+"<br/>"+g.pathArray[5].path+"  "+g.pathArray[5].totalDuration+"<br/>"
+						+g.pathArray[6].path+"  "+g.pathArray[6].totalDuration+"<br/>"+g.pathArray[7].path+"  "+g.pathArray[7].totalDuration+"<br/>"
+						+g.pathArray[8].path+"  "+g.pathArray[8].totalDuration+"<br/>"+g.pathArray[9].path+"  "+g.pathArray[9].totalDuration+"<br/>"
+						+g.pathArray[10].path+"  "+g.pathArray[10].totalDuration+"<br/>"+g.pathArray[11].path+"  "+g.pathArray[11].totalDuration+"<br/>"
 						+"And so on...</html>");
 			}
 		});
@@ -294,7 +292,7 @@ public class networkDiagram extends JFrame implements ActionListener {
                 }
             }
             
-			String filename = "C:/Users/crinc_000/Documents/School Projects/CSE360/"+name+".txt";
+			String filename = DIRECTORY+name+".txt";
 			try {
 				PrintWriter graphData = new PrintWriter(filename);
 				graphData.println(name);
@@ -305,8 +303,9 @@ public class networkDiagram extends JFrame implements ActionListener {
 					graphData.println(g.nodeArray[i].name+"\t"+g.nodeArray[i].duration);
 				}
 				graphData.println();
-				graphData.println("POSSIBLE PATHWAYS");
 				
+				graphData.println("POSSIBLE PATHWAYS");
+
 				int counter = 0;
 				Pathway temp2;
 				while(g.pathArray[counter].totalDuration!=0){
@@ -328,6 +327,7 @@ public class networkDiagram extends JFrame implements ActionListener {
 				while(g.pathArray[counter].totalDuration!=0){
 					graphData.println(g.pathArray[counter].path+" "+g.pathArray[counter].totalDuration);
 				}
+				
 				graphData.close();
 			} catch (FileNotFoundException e1) {
 				// TODO Auto-generated catch block
