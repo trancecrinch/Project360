@@ -5,7 +5,8 @@ import java.io.PrintWriter;
 
 import javax.swing.*;
 
-import PROJECT.Graph.Node;
+import mySQL.Graph.Node;
+import mySQL.Graph.Pathway;
 
 public class networkDiagram extends JFrame implements ActionListener {
 
@@ -20,7 +21,6 @@ public class networkDiagram extends JFrame implements ActionListener {
 	public boolean CheckError(Node x) {
 	    for (int i = 0; i < g.nodeArray.length; i++) {
 	        if(g.nodeArray[i].symbol != '_') {
-	        	System.out.println("Testing");
 	        	if(x.symbol == g.nodeArray[i].symbol) {
 	        		return true;
 	        	}
@@ -40,14 +40,18 @@ public class networkDiagram extends JFrame implements ActionListener {
 
 
 	public boolean ParentCheck(Node x, Node y) {
+
 	    for (int i = 0; i < y.dependencies.length; i++) {
 	        if (x.symbol == y.dependencies[i]) {
+
 	            return true;
 	        }
 	        for (int j = 0; j < g.nodeArray.length; j++) {
-	            if (g.nodeArray[j].symbol != '_') {
+	            if (g.nodeArray[j].symbol != '_' ) {
 	            if (g.nodeArray[j].symbol == y.dependencies[i]) {
-	                ParentCheck(x, g.nodeArray[j]);
+	                if (ParentCheck(x, g.nodeArray[j])) {
+	                    return true;
+	                }
 	            }
 	        }
 	        }
@@ -56,29 +60,33 @@ public class networkDiagram extends JFrame implements ActionListener {
 	}
 	
 
-	public String pathFinder(){
-	    String path = "";
-	    int duration = 0;
-	    for(int i = 0; i <= g.nodeArray.length; i++){
-	            if(g.nodeArray[i].dependencies == null){
-	                //path = g.nodeArray[i].symbol;
-	                duration += g.nodeArray[i].duration;
-	            }
-	            else if(g.nodeArray[i].dependencies != null){
-	                for(int j = 0; j <= g.nodeArray[i].dependencies.length; j++){
-	                    if(g.nodeArray[i].dependencies[j] == g.nodeArray[i+1].symbol){
-	                        path += ", " + g.nodeArray[i+1].symbol;
-	                        duration += g.nodeArray[i+1].duration;
-	                    }
-	                    else{
-	                        path += g.nodeArray[i].symbol;
-	                        duration += g.nodeArray[i].duration;
-	                    }
-	                }
-	            }
-	    }
-	    path += " - " + duration;
-	    return path;
+	int pathCounter=0;
+	public Pathway[] pathFinder(Node[] n, Pathway[] paths,int progressCounter, String current_path,int duration){
+		current_path += n[progressCounter].symbol;
+		duration += n[progressCounter].duration;
+		boolean end = true;
+		for(int j = progressCounter+1;j<activityCounter;j++){
+			int i = 0;
+			while(n[j].dependencies[i]!='_'){
+				System.out.println(j);
+				if(n[progressCounter].symbol==n[j].dependencies[i]){
+					progressCounter = j;
+					pathFinder(n,paths,progressCounter,current_path,duration);
+					end = false;
+					System.out.println(current_path);
+				}
+				else{
+					i++;
+				}
+			}
+		}
+		
+		if(end == true){
+			paths[pathCounter].path = current_path;
+			paths[pathCounter].totalDuration = duration;
+			pathCounter++;
+		}
+	    return paths;
 	}
 
 
@@ -88,7 +96,7 @@ public class networkDiagram extends JFrame implements ActionListener {
 	private networkDiagram(){
 		super("PERT Pathfinder");
 		
-		g.setupGraph(g.nodeArray);
+		g.setupGraph(g.nodeArray,g.pathArray);
 		//------------------------------------------------------------------------------------The Window
 		setLayout(null);
 		setSize(800,400);
@@ -178,11 +186,13 @@ public class networkDiagram extends JFrame implements ActionListener {
 				}
 				int t = Integer.parseInt(time.getText());
 				Node addedNode=g.newNode(a,s,d,t);
-				System.out.println(addedNode.name+"  "+addedNode.symbol+"  "+addedNode.dependencies[0]+"  "+addedNode.duration+"  ");
-				
 				if(CheckError(addedNode)==true){
 					System.out.println("ERROR");
 					monitor.setText("Cycle or Already Added Activity detected. Entry denied.");
+				}
+				else if(d.equals(null)&&activityCounter!=0){
+					System.out.println("ERROR");
+					monitor.setText("Nodes must be involved with the graph. Entry denied.");
 				}
 				else{
 					System.out.println("no error");
@@ -216,7 +226,31 @@ public class networkDiagram extends JFrame implements ActionListener {
 		
 		pathButton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				System.out.println(pathFinder());
+				g.pathArray=pathFinder(g.nodeArray,g.pathArray,0,"",0);
+				int counter = 0;
+				Pathway temp;
+				while(g.pathArray[counter].totalDuration!=0){
+					int counter2 = counter+1;
+	                while(g.pathArray[counter2].totalDuration!=0) 
+	                {
+	                    if(g.pathArray[counter].totalDuration-g.pathArray[counter2].totalDuration<0) 
+	                    {
+	                    	temp = g.newPath(g.pathArray[counter].path,g.pathArray[counter].totalDuration);
+	                        g.pathArray[counter] = g.pathArray[counter2];
+	                        g.pathArray[counter2] = temp;
+	                    }
+	                counter2++;
+	                }
+	            counter++;
+	            }
+				
+				monitor.setText("<html>CRITICAL PATH<b/>"+g.pathArray[0].path+"  "+g.pathArray[0].totalDuration+"<b/>"+g.pathArray[1].path+"  "+g.pathArray[1].totalDuration+"<b/>"
+						+g.pathArray[2].path+"  "+g.pathArray[2].totalDuration+"<b/>"+g.pathArray[3].path+"  "+g.pathArray[3].totalDuration+"<b/>"
+						+g.pathArray[4].path+"  "+g.pathArray[4].totalDuration+"<b/>"+g.pathArray[5].path+"  "+g.pathArray[5].totalDuration+"<b/>"
+						+g.pathArray[6].path+"  "+g.pathArray[6].totalDuration+"<b/>"+g.pathArray[7].path+"  "+g.pathArray[7].totalDuration+"<b/>"
+						+g.pathArray[8].path+"  "+g.pathArray[8].totalDuration+"<b/>"+g.pathArray[9].path+"  "+g.pathArray[9].totalDuration+"<b/>"
+						+g.pathArray[10].path+"  "+g.pathArray[10].totalDuration+"<b/>"+g.pathArray[11].path+"  "+g.pathArray[11].totalDuration+"<b/>"
+						+"And so on...</html>");
 			}
 		});
 		helpButton.addActionListener(new ActionListener(){
@@ -247,23 +281,20 @@ public class networkDiagram extends JFrame implements ActionListener {
             String date = JOptionPane.showInputDialog("Date and Time of Creation?",null);
 			
             Node temp;
-            for (int i=0;i<activityCounter;i++) 
+            for(int i=0;i<activityCounter;i++) 
             {
-                for (int j=i+1;j<activityCounter;j++) 
+                for(int j=i+1;j<activityCounter;j++) 
                 {
-                    if (g.nodeArray[i].name.compareTo(g.nodeArray[j].name)>0) 
+                    if(g.nodeArray[i].name.compareTo(g.nodeArray[j].name)>0) 
                     {
-                        System.out.println(g.nodeArray[i].name);
-                        System.out.println(g.nodeArray[j].name);
                     	temp = g.newNode(g.nodeArray[i].name,g.nodeArray[i].symbol,g.nodeArray[i].dependencies,g.nodeArray[i].duration);
                         g.nodeArray[i] = g.nodeArray[j];
-                        System.out.println(temp.name);
                         g.nodeArray[j] = temp;
                     }
                 }
             }
             
-			String filename = DIRECTORY+name+".txt";
+			String filename = "C:/Users/crinc_000/Documents/School Projects/CSE360/"+name+".txt";
 			try {
 				PrintWriter graphData = new PrintWriter(filename);
 				graphData.println(name);
@@ -275,6 +306,28 @@ public class networkDiagram extends JFrame implements ActionListener {
 				}
 				graphData.println();
 				graphData.println("POSSIBLE PATHWAYS");
+				
+				int counter = 0;
+				Pathway temp2;
+				while(g.pathArray[counter].totalDuration!=0){
+					int counter2 = counter+1;
+	                while(g.pathArray[counter2].totalDuration!=0) 
+	                {
+	                    if(g.pathArray[counter].totalDuration-g.pathArray[counter2].totalDuration<0) 
+	                    {
+	                    	temp2 = g.newPath(g.pathArray[counter].path,g.pathArray[counter].totalDuration);
+	                        g.pathArray[counter] = g.pathArray[counter2];
+	                        g.pathArray[counter2] = temp2;
+	                    }
+	                counter2++;
+	                }
+	            counter++;
+	            }
+				
+				counter = 0;
+				while(g.pathArray[counter].totalDuration!=0){
+					graphData.println(g.pathArray[counter].path+" "+g.pathArray[counter].totalDuration);
+				}
 				graphData.close();
 			} catch (FileNotFoundException e1) {
 				// TODO Auto-generated catch block
@@ -283,7 +336,7 @@ public class networkDiagram extends JFrame implements ActionListener {
 		}
 		if(e.getActionCommand().equals("Restart")){
 			activityCounter = 0;
-			g.setupGraph(g.nodeArray);
+			g.setupGraph(g.nodeArray,g.pathArray);
 		}
 	}
 }
