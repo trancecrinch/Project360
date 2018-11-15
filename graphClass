@@ -1,0 +1,49 @@
+class Graph
+{
+
+	Node[] nodeArray = new Node[99]; 
+	
+public void setupGraph(Node[] n){
+	char[] d = new char[50];
+	for(int i = 0;i<50;i++){
+		d[i] = '_';
+	}
+	for(int i=0;i<99;i++){
+		n[i] = newNode(" ",'_',d,0);
+	}
+}
+
+	
+public Node newNode(String a, char s, char[] d, int t){
+	Node n = new Node();
+	n.name=a;
+	n.symbol = s;
+	n.dependencies = d;
+	n.duration = t;
+	return n;
+}
+
+public Node deleteNode(Node n){
+	n.name = " ";
+	n.duration = 0;
+	n.symbol = '_';
+	char[] d = new char[50];
+	for(int i = 0;i<50;i++){
+		d[i] = '_';
+	}
+	n.dependencies=d;
+	return n;
+}
+
+
+	
+public class Node
+{
+		String name; // is the name of the node for the depen
+		int duration = 0; // user input of the time
+		char symbol = '_';
+		char[] dependencies = new char[50];
+}
+
+
+}
